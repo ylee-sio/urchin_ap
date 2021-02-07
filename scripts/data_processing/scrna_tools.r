@@ -55,3 +55,17 @@ subcluster_suite = function(seurat_object, res, ndims, strat, jackstraw, coord_s
   return(seurat_object)
   
 }
+
+# returns numbers of cells from each Ident in a seurat_obj
+get_cell_stats = function(seurat_obj){
+  
+  cluster_ids = unique(Idents(seurat_obj)) 
+  cell_nums = map(.x = unique(Idents(seurat_obj)), .f = function(x)(seurat_obj %>% 
+                                                                      subset(idents = x) %>% 
+                                                                      GetAssayData() %>% 
+                                                                      ncol())
+  ) %>% 
+    unlist()
+  cell_stats_tibble = tibble(cluster_num = cluster_ids, num_cells = cell_nums)
+  return(cell_stats_tibble)
+}
