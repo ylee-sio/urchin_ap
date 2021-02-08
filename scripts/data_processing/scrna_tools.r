@@ -1,4 +1,5 @@
 library(tidyverse)
+library(Seurat)
 
 # returns which GeneIDs ("LOC...") from a list exist in the Foster 2020 S. purpuratus dataset 
 in_urchin = function(seurat_obj, gene_id_list){
@@ -68,4 +69,33 @@ get_cell_stats = function(seurat_obj){
     unlist()
   cell_stats_tibble = tibble(cluster_num = cluster_ids, num_cells = cell_nums)
   return(cell_stats_tibble)
+}
+
+# returns a list of seurat_obj objects that have been clustered with a user provided 1) single ndim range and 2) list of resolutions 
+# depends on subcluster_suite
+cluster_multiple_res = function(seurat_obj, ndims, res_list){
+  tic()
+  plan(strategy = multiprocess, workers = 8)
+  cluster_list = future_map(.x = res_list, .f = function(x)(subcluster_suite(seurat_obj, x, ndims)))
+  return(cluster_list)
+  toc()
+}
+
+# returns a list of seurat_obj objects that ahve been clustered with a user provided 1) single resolution and 2) list of ndim ranges
+# depends on subcluster_suite
+cluster_multiple_ndims = function(seurat_obj, ndims_list, res){
+  tic()
+  plan(strategy = multiprocess, workers = 16)
+  cluster_list = future_map(.x = ndims_list, .f = function(x)(subcluster_suite(seurat_obj, res, x)))
+  return(cluster_list)
+  toc()
+}
+
+# parallel plotting of DimPlots
+plot_multiple_dp = function(cluster_list, output_path, file_name){
+
+  dimplot_list = future_map(cluster_list, DimPlot)
+  plots = CombinePlots(dimplot_list)
+  return(plots)
+
 }
