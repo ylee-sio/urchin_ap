@@ -90,12 +90,3 @@ cluster_multiple_ndims = function(seurat_obj, ndims_list, res){
   return(cluster_list)
   toc()
 }
-
-# parallel plotting of DimPlots
-plot_multiple_dp = function(cluster_list, output_path, file_name){
-
-  dimplot_list = future_map(cluster_list, DimPlot)
-  plots = CombinePlots(dimplot_list)
-  return(plots)
-
-}
