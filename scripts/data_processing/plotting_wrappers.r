@@ -64,9 +64,11 @@ labelled_dotplot = function(scrna_df, feature_df, plot_title, by_stage = F, plot
   output_dir_name = paste0(output_path, file_name, "/")
   dir.create(output_dir_name)
   
+# non-optional annotation
+  annotate_vis(output_dir_name = output_dir_name)
 
 # creates pdf for static DotPlot
-  pdf(file = paste0(output_dir_name, file_name, ".pdf"), height = 24, width=12)
+  pdf(file = paste0(output_dir_name, file_name, "_dotplot", ".pdf"), height = 24, width=12)
   dp
   dev.off()
   
