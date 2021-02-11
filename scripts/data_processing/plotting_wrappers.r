@@ -13,6 +13,13 @@ annotate_vis = function(output_dir_name){
   close(txtfile)
 }
 
+# ensures no replacement of directories when name inputs are identical to existing directories
+append_vis_num = function(output_dir_name){
+  directory_counts = length(list.files(output_dir_name))
+  new_directory_label = directory_counts + 1
+  return(new_directory_label)
+}
+
 # parallel plotting of DimPlots
 # requires lists of seurat_objs
 plot_multiple_dimplots = function(cluster_list, file_name){
