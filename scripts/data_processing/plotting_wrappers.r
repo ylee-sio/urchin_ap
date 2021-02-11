@@ -11,6 +11,7 @@ plot_multiple_dimplots = function(cluster_list, file_name){
 # creates directory for each output
   output_dir_name = paste0(output_path, file_name, "/")
   dir.create(output_dir_name)
+
   dimplot_list = future_map(cluster_list, DimPlot)
   plots = CombinePlots(dimplot_list)
 
@@ -24,7 +25,7 @@ plot_multiple_dimplots = function(cluster_list, file_name){
 }
 
 # generates DotPlots which have labeled features along with option for plotly interactivity and export of interactive plots  
-lab_DP = function(scrna_df, feature_df, plot_title, by_stage = F, plot_height, interactive, col.min, col.max, dot.min, cols, name){
+labelled_dotplot = function(scrna_df, feature_df, plot_title, by_stage = F, plot_height, interactive, col.min, col.max, dot.min, cols, file_name){
   
   
   dp = DotPlot(scrna_df, features = feature_df$GeneID, col.min = col.min, col.max = col.max, dot.min = dot.min, cols = cols) + 
@@ -46,8 +47,12 @@ lab_DP = function(scrna_df, feature_df, plot_title, by_stage = F, plot_height, i
         ggtitle(as.character(plot_title)) + 
         coord_flip() 
     }
+
+# creates directory for each output
+  output_dir_name = paste0(output_path, file_name, "/")
+  dir.create(output_dir_name)
   
-  htmlwidgets::saveWidget(as_widget(dp), paste0(output_path, name,"_index.html"))
+  htmlwidgets::saveWidget(as_widget(dp), paste0(output_dir_name, file_name,"_index.html"))
 
   return(dp)
 
