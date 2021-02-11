@@ -17,6 +17,7 @@ annotate_vis = function(output_dir_name){
 append_vis_num = function(output_dir_name){
   directory_counts = length(list.files(output_dir_name))
   new_directory_label = directory_counts + 1
+  new_directory_label = paste0(output_dir_name, "_", as.character(new_directory_label),"/")
   return(new_directory_label)
 }
 
@@ -24,8 +25,9 @@ append_vis_num = function(output_dir_name){
 # requires lists of seurat_objs
 plot_multiple_dimplots = function(cluster_list, file_name){
 
-# creates directory for each output
-  output_dir_name = paste0(output_path, file_name, "/")
+# creates unique directory for each output  
+  unlabeled_output_dir_name = paste0(output_path, file_name)
+  output_dir_name = append_vis_num(unlabeled_output_dir_name)
   dir.create(output_dir_name)
 
   dimplot_list = future_map(cluster_list, DimPlot)
