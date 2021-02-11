@@ -2,7 +2,16 @@ library(tidyverse)
 library(Seurat)
 library(ggplotly)
 
+# standardizes output directory
 output_path = "~/Projects/urchin_ap/output/"
+
+# standardizes output annotation
+annotate_vis = function(output_dir_name){
+  annotation = readline(prompt="What is main purpose of this plot? ")
+  txtfile = file(paste0(output_dir_name, "annotation.txt"))
+  writeLines(annotation, txtfile)
+  close(txtfile)
+}
 
 # parallel plotting of DimPlots
 # requires lists of seurat_objs
@@ -15,11 +24,14 @@ plot_multiple_dimplots = function(cluster_list, file_name){
   dimplot_list = future_map(cluster_list, DimPlot)
   plots = CombinePlots(dimplot_list)
 
+# non-optional annotation
+  annotate_vis(output_dir_name = output_dir_name)
 # creates pdf of DimPlots
   pdf(file = paste0(output_dir_name, file_name, "_dimplot.pdf", height = 12, width = 12)
   plots
   dev.off()
 
+  
   return(plots)
 
 }
