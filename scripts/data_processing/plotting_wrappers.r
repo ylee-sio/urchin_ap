@@ -52,6 +52,12 @@ labelled_dotplot = function(scrna_df, feature_df, plot_title, by_stage = F, plot
   output_dir_name = paste0(output_path, file_name, "/")
   dir.create(output_dir_name)
   
+
+# creates pdf for static DotPlot
+  pdf(file = paste0(output_dir_name, file_name, ".pdf"), height = 24, width=12)
+  dp
+  dev.off()
+  
   htmlwidgets::saveWidget(as_widget(dp), paste0(output_dir_name, file_name,"_index.html"))
 
   return(dp)
