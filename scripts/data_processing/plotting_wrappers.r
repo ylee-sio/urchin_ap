@@ -68,11 +68,11 @@ labelled_dotplot = function(scrna_df, feature_df, plot_title, by_stage = F, plot
         ggtitle(as.character(plot_title)) + 
         coord_flip() 
     }
-
-# creates directory for each output
-  output_dir_name = paste0(output_path, file_name, "/")
+# creates unique directory for each output
+  unlabeled_output_dir_name = paste0(output_path, file_name)
+  output_dir_name = append_vis_num(unlabeled_output_dir_name)
   dir.create(output_dir_name)
-  
+
 # non-optional annotation
   annotate_vis(output_dir_name = output_dir_name)
 
