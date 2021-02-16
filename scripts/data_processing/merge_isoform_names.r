@@ -1,3 +1,5 @@
+# features_df is one of the three files required for Seurat objects. it contains a column GeneID, which contains unique features (genes) to be investigated. each element is linked to read counts of the gene
+
 merge_isoform_feature_names_gene_label = function(features_path, features_df){
   
   features_source = read_tsv(features_path, col_names = F)
