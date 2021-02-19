@@ -1,12 +1,6 @@
 # using the output from merge_isoform_names.r (list of merged isoform feature names), this function merges the associated counts for the new isoforms 
 merge_paralog_feature_counts = function(matrix_path, features_path, features_df, key_name, path){
 
-  # matrix_path = "~/sp_transportomics/data_sources/primary/scrna/GSE155427_RAW_modified/sp48gcm_mo/matrix.mtx.gz"
-  # features_path = "~/sp_transportomics/data_sources/primary/scrna/GSE155427_RAW_modified/sp48gcm_mo/features.tsv.gz"
-  # features_df = genes_to_be_merged
-  # key_name = "sp48gcm_mo"
-  # path = "~/sp_transportomics/data_sources/primary/scrna/GSE155427_RAW_modified/sp48gcm_mo/"
-  # 
   orig_matrix = readMM(matrix_path)
   features_source = read_tsv(features_path, col_names = F)
   list_of_paralog_dfs = features_df %>%
@@ -22,7 +16,7 @@ merge_paralog_feature_counts = function(matrix_path, features_path, features_df,
 
   for (i in 1:length(list_of_paralog_indices)){
     if (length(list_of_paralog_indices[[i]])>1){
-      summed_appended_row = Matrix(orig_matrix[list_of_paralog_indices[[i]],] %>% colSums(), nrow = 1, sparse = T)
+      summed_appended_row = Matrix(orig_matrix[list_of_paralog_indices[[i]],] %>% colSums(), nrow = 1, sparse = F)
       new_matrix = rbind(new_matrix, summed_appended_row)
     } else {
       unmodified_appended_row = orig_matrix[list_of_paralog_indices[[i]],]
