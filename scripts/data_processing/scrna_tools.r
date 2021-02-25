@@ -90,3 +90,45 @@ cluster_multiple_ndims = function(seurat_obj, ndims_list, res){
   return(cluster_list)
   toc()
 }
+
+# added get_pos_cells, thresholded extractions of cells using a single target
+get_pos_cells = function(seurat_obj, gene_id, thresh, rev = NULL){
+  
+  if (rev == T){
+    
+    cells = which(GetAssayData(seurat_obj, slot = "counts")[gene_id,] < thresh) %>% names()
+    
+  } else {
+    cells = which(GetAssayData(seurat_obj, slot = "counts")[gene_id,] > thresh) %>% names()
+    
+  }
+  
+  if (length(cells) > 0){
+    
+    pos_cells = subset(seurat_obj, cells = cells)
+    pos_cells_raw_count_values = GetAssayData(pos_cells, slot = "counts")[gene_id,]
+    pos_cells_normalized_cell_type_relative_avg_log2FC_values = GetAssayData(pos_cells)[gene_id,]
+    pos_cells_orig_cluster_id = map(.x = cells, .f = function(x)(seurat_obj@meta.data[x,])) %>% bind_rows() %>% select(seurat_clusters)
+    
+    pos_cells_tibble = tibble(cells = cells, 
+                              raw_counts = pos_cells_raw_count_values, 
+                              normalized_cell_type_relative_avg_log2FC = pos_cells_normalized_cell_type_relative_avg_log2FC_values, 
+                              orig_cluster_id = pos_cells_orig_cluster_id$seurat_clusters, 
+                              gene = gene_id, 
+                              stage = seurat_obj@meta.data$orig.ident %>% levels(),
+                              num_cells = length(cells)
+    )
+  } else {
+    
+    pos_cells_tibble = tibble(
+      cells = c(NA) ,
+      raw_counts = 0, 
+      normalized_cell_type_relative_avg_log2FC = 0, 
+      orig_cluster_id = c(NA) %>% as.factor(), 
+      gene = gene_id, 
+      stage = seurat_obj@meta.data$orig.ident %>% levels(),
+      num_cells = 0 %>% as.integer()
+    )
+  }
+  return(pos_cells_tibble)
+}
