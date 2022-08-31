@@ -1,10 +1,50 @@
-unmodified_sp1.data = Read10X(data.dir = "data/unmodified/sp1/")
-unmodified_sp1 = CreateSeuratObject(counts = unmodified_sp1.data)
-#unmodified_sp1_clustered = subcluster_suite(seurat_object = unmodified_sp1.data, res = 0.4, ndims = 1:5, strat = "tsne", jackstraw = F, coord_strat = "pca")
-unmodified_gene_names = tibble(
-  GeneID = unmodified_sp1_clustered %>% rownames(),
-  Name = unmodified_sp1_clustered %>% rownames()
+# Run this script in terminal using 'R CMD BATCH obtain_working_data.R'
+# This script only needs to be run one-time to obtain working data that has been processed with the parameters below. Adjust accordingly.
+
+# setting workers for parallel operations
+plan(multicore, workers = 8)
+
+# make a list of paths for each directory (developmental stage specific) containing the matrix, feature, and barcode files 
+indv_stage_dirs = list.files("data/unmodified", full.names = T)
+
+# creates a list of matrices (developmental stage specific) of expression data to be used to create seurat_objects
+all_stages.data = future_map(
+  .x = indv_stage_dirs, 
+  .f = function(x)(
+    Read10X(
+      data.dir = x,
+    )
+  )
 )
+saveRDS(all_stages.data, "data/unmodified/all_stages.data.rds")  
+
+# creates a list of seurat_objects for each stage using list of scrna matrices from all_stages.data
+all_stages.seurat_obj_list = future_map(
+  .x = all_stages.data,
+  .f = function(x)(
+    CreateSeuratObject(
+      counts = x
+      )
+  )
+)
+saveRDS(all_stages.seurat_obj_list, "data/unmodified/all_stages.seurat_obj_list.rds")
+
+# creates a list of normalized, clustered seurat_objects using a list of unclustered seurat_objects from all_stages.seurat_obj_list
+all_stages.clustered_seurat_obj_list = future_map(
+  .x = all_stages.seurat_obj_list,
+  .f = function(x)(
+    subcluster_suite(
+      seurat_object = x,
+      res = 0.8,
+      ndims = 1:15,
+      strat = "tsne",
+      jackstraw = F,
+      coord_strat = "pca"
+    )
+  )
+)
+saveRDS(all_stages.clustered_seurat_obj_list, "data/unmodified/all_stages.clustered_seurat_obj_list.rds")
+
 
 unmod_integ = readRDS("sp_transportomics/data_sources/primary/scrna/GSE149221_integrated/GSE149221_SpInteg.rds")
 
