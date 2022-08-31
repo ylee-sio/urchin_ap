@@ -1,4 +1,70 @@
+library(tidyjson)
+library(rjson)
+library(jsonlite)
+
+# read in kegg brite pathway categorized genes from KEGG
+sp_kegg_transporters = read_json("data/source/spu02000_transporters.json") %>% 
+  unlist(use.names = F)
+
+# filter for items starting with digits by getting an index for sp_kegg_transporters. these digits are entrez GeneIDs
+sp_kegg_transporters_digit_start_index = sp_kegg_transporters %>% 
+  str_starts("[:digit:]") %>% 
+  which()
+
+# filtered list of items starting with digits
+sp_kegg_transporters_cleaned = sp_kegg_transporters[sp_kegg_transporters_digit_start]
+
+# obtain index for those annotated as "SLC". after manual checking, this does get all of them since they are annotated as SLC by standard
+sp_kegg_slc_index = sp_kegg_transporters_cleaned %>% 
+  str_detect("SLC") %>% 
+  which()
+
+# obtain index for those annotated as "ABC". after manual checking, this does get all of them since they are annotated as ABC by standard
+sp_kegg_abc_index = sp_kegg_transporters_cleaned %>% 
+  str_detect("ABC") %>% 
+  which()
+
+# use the indices obtained above to filter from a cleaned df 
+sp_kegg_slc_digit_start_extracted = sp_kegg_transporters_cleaned[sp_kegg_slc_index]
+sp_kegg_abc_digit_start_extracted = sp_kegg_transporters_cleaned[sp_kegg_abc_index]
+
+#SLC
+#create usable tibble with GeneIDs and annotations for each final filtered list of genes of interest
+sp_kegg_slc_geneid_num = sp_kegg_slc_digit_start_extracted %>% 
+  str_extract("[:digit:]{6,}") 
+
+sp_kegg_slc_geneid = paste0("LOC", sp_kegg_slc_geneid_num)
+
+sp_kegg_slc_gene_anno = sp_kegg_slc_digit_start_extracted %>% 
+  str_extract("SLC[:digit:]*[:alpha:]*[:digit:]*") %>% 
+  unlist()
+
+sp_kegg_slc = tibble(
+  GeneID = sp_kegg_slc_geneid,
+  Name = sp_kegg_slc_gene_anno
+)
+
+#ABC
+sp_kegg_abc_geneid_num = sp_kegg_abc_digit_start_extracted %>% 
+  str_extract("[:digit:]{6,}") 
+
+sp_kegg_abc_geneid = paste0("LOC", sp_kegg_abc_geneid_num)
+
+sp_kegg_abc_gene_anno = sp_kegg_abc_digit_start_extracted %>% 
+  str_extract("ABC[:digit:]*[:alpha:]*[:digit:]*") %>% 
+  unlist()
+
+sp_kegg_abc = tibble(
+  GeneID = sp_kegg_abc_geneid,
+  Name = sp_kegg_abc_gene_anno
+)
+
+sp_kegg_smts = bind_rows(sp_kegg_slc, sp_kegg_abc)
+
+
 # parses raw kegg brite files into manipulatable dataframes
+
+
 
 parse_kegg_brite = function(kegg_json_file_path){
   awful_kegg_json = tibble(L2_l1 = "L2_l1",
