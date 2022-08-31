@@ -54,32 +54,11 @@ print("Done clustering seurat objects. ")
 # creates separate directory outside of raw data directory containing working data
 dir.create("~/Projects/urchin_ap/data/working_data")
 
-# creates list of intermediate and final working data objects to be saved
-working_data_object_list = c(
-  all_stages.data,
-  all_stages.seurat_obj_list,
-  all_stages.clustered_seurat_obj_list
-)
-
-# creates list of intermediate and final working data file names to be saved
-working_data_filename_list = c(
-  "~/Projects/urchin_ap/data/working_data/all_stages.data.rds",
-  "~/Projects/urchin_ap/data/working_data/all_stages.seurat_obj_list.rds",
-  "~/Projects/urchin_ap/data/unmodified/all_stages.clustered_seurat_obj_list.rds"
-)
-
-future::plan("multicore", workers = 3)
-# saves working data in parallel
 print("Saving intermediary and final working data files... ")
-future_map2(
-  .x = working_data_object_list,
-  .y = working_data_filename_list,
-  .f = function(x,y)(
-    saveRDS(
-      object = x,
-      file = y
-      )
-  )
-)
+
+saveRDS(all_stages.data,  "~/Projects/urchin_ap/data/working_data/all_stages.data.rds")
+saveRDS(all_stages.seurat_obj_list,  "~/Projects/urchin_ap/data/working_data/all_stages.seurat_obj_list.rds")
+saveRDS(all_stages.clustered_seurat_obj_list, "~/Projects/urchin_ap/data/unmodified/all_stages.clustered_seurat_obj_list.rds")
+
 print("Done saving files. ")
 toc()
