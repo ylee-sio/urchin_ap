@@ -41,8 +41,8 @@ all_stages.clustered_seurat_obj_list = map(
   .f = function(x)(
     subcluster_suite(
       seurat_object = x,
-      res = 0.8,
-      ndims = 1:15,
+      res = 0.4,
+      ndims = 1:8,
       strat = "tsne",
       jackstraw = F,
       coord_strat = "pca"
@@ -58,7 +58,7 @@ print("Saving intermediary and final working data files... ")
 
 saveRDS(all_stages.data,  "~/Projects/urchin_ap/data/working_data/all_stages.data.rds")
 saveRDS(all_stages.seurat_obj_list,  "~/Projects/urchin_ap/data/working_data/all_stages.seurat_obj_list.rds")
-saveRDS(all_stages.clustered_seurat_obj_list, "~/Projects/urchin_ap/data/unmodified/all_stages.clustered_seurat_obj_list.rds")
+saveRDS(all_stages.clustered_seurat_obj_list, "~/Projects/urchin_ap/data/all_stages.clustered_seurat_obj_list.rds")
 
 print("Done saving files. ")
 toc()

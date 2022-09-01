@@ -1,5 +1,3 @@
-library(tidyjson)
-library(rjson)
 library(jsonlite)
 
 # read in kegg brite pathway categorized genes from KEGG
@@ -12,7 +10,7 @@ sp_kegg_transporters_digit_start_index = sp_kegg_transporters %>%
   which()
 
 # filtered list of items starting with digits
-sp_kegg_transporters_cleaned = sp_kegg_transporters[sp_kegg_transporters_digit_start]
+sp_kegg_transporters_cleaned = sp_kegg_transporters[sp_kegg_transporters_digit_start_index]
 
 # obtain index for those annotated as "SLC". after manual checking, this does get all of them since they are annotated as SLC by standard
 sp_kegg_slc_index = sp_kegg_transporters_cleaned %>% 
@@ -63,9 +61,6 @@ sp_kegg_smts = bind_rows(sp_kegg_slc, sp_kegg_abc)
 
 
 # parses raw kegg brite files into manipulatable dataframes
-
-
-
 parse_kegg_brite = function(kegg_json_file_path){
   awful_kegg_json = tibble(L2_l1 = "L2_l1",
                            L2_l2 = "L2_l2",
