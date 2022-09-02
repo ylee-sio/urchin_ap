@@ -1,0 +1,28 @@
+
+R version 4.2.1 (2022-06-23) -- "Funny-Looking Kid"
+Copyright (C) 2022 The R Foundation for Statistical Computing
+Platform: aarch64-apple-darwin21.6.0 (64-bit)
+
+R is free software and comes with ABSOLUTELY NO WARRANTY.
+You are welcome to redistribute it under certain conditions.
+Type 'license()' or 'licence()' for distribution details.
+
+R is a collaborative project with many contributors.
+Type 'contributors()' for more information and
+'citation()' on how to cite R or R packages in publications.
+
+Type 'demo()' for some demos, 'help()' for on-line help, or
+'help.start()' for an HTML browser interface to help.
+Type 'q()' to quit R.
+
+> # Run this script in terminal using 'R CMD BATCH obtain_working_data.R'
+> # This script only needs to be run one-time to obtain working data that has been processed with the parameters below. Adjust accordingly.
+> 
+> # setting workers for parallel operations
+> dir.create("data/unmodified/working_data")
+Warning message:
+In dir.create("data/unmodified/working_data") :
+  cannot create dir 'data/unmodified/working_data', reason 'No such file or directory'
+> plan(multicore, workers = 8)
+Error in plan(multicore, workers = 8) : could not find function "plan"
+Execution halted
