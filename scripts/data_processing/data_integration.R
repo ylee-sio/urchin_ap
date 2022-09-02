@@ -1,0 +1,6 @@
+library(Seurat)
+all_stages = readRDS("data/working_data/all_stages.seurat_obj_list.rds")
+features = SelectIntegrationFeatures(object.list = all_stages)
+sp.anchors = FindIntegrationAnchors(object.list = all_stages, anchor.features = features)
+sp.combined <- IntegrateData(anchorset = sp.anchors)
+saveRDS(sp.combined, file = "data/working_data/sp_integrated.rds")
