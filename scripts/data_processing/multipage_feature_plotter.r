@@ -50,6 +50,11 @@ stages_filtered_positive_features = map2(
   )
 )
 
+saveRDS(
+  stages_filtered_positive_features,
+  "data/working_data/all_stages.clustered_seurat_obj_list_positive_features_filtered.rds"
+  )
+
 splg = stages_filtered_positive_features[[8]]
 test_smt_geneid = rownames(splg)[rownames(splg) %in% sp_kegg_smts$GeneID %>% which()]
 test_smts_df = sp_kegg_smts[sp_kegg_smts$GeneID %in% test_smt_geneid %>% which(),] %>% unique()
