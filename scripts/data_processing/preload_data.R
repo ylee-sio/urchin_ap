@@ -48,28 +48,6 @@ saveRDS(all_stages.clustered_seurat_obj_list, "data/unmodified/all_stages.cluste
 
 unmod_integ = readRDS("sp_transportomics/data_sources/primary/scrna/GSE149221_integrated/GSE149221_SpInteg.rds")
 
-
-standard_markers_for_display = 
-  tibble(
-    GeneID = c("ARS", "SPEC1", "spec2d", "NK2.2", "Klf7", 
-               "egf1", "ebr1", "CHRD", "FoxG", "Lim1", "foxq2", 
-               "NK2.1", "AnkAT-1", "Endo16", "FoxA", "GATAe", "blimp1/krox",
-               "Six1", "gcm", "rab3", "LOC588806", "COLP3alpha","SpP19L", "SM50", 
-               "SM37", "msp130",  "erg", "adv", "Alx1","LOC100887863", "LOC373434", "Nanos2", 
-               "GCF1", "HDAC1", "NSF", "pabp", "vasa",
-               "LOC592057", "LOC373476", "LOC577601", "delta", "VAMP"),
-    
-    Name = c("ARS", "SPEC1", "spec2d", "NK2.2", "Klf7", 
-             "egf1", "ebr1", "CHRD", "FoxG", "Lim1", "foxq2", 
-             "NK2.1", "AnkAT-1", "Endo16", "FoxA", "GATAe", "blimp1/krox",
-             "Six1", "gcm", "rab3", "PKS1", "COLP3alpha","SpP19L" ,"SM50", 
-             "SM37", "msp130", "erg", "adv", "Alx1", "tdrd1", "seawi", "Nanos2",
-             "GCF1", "HDAC1", "NSF", "pabp", "vasa",
-             "HesC", "syntaxin", "brn1/2/4", "delta", "VAMP")
-  )
-
-abc_slc_3_geneid_final_cleaned = read_csv("/Users/yl/sp_transportomics/data_sources/secondary/pm_abcs_slcs_merged.csv")
-
 splg_unmodified.data = Read10X(data.dir = "~/sp_transportomics/data_sources/primary/scrna/GSE149221_RAW/SpLG")
 splg_unmodified = CreateSeuratObject(counts = splg_unmodified.data, project = "Late\ngastrula")
 urchin_5_splg_clustered_unmodified = subcluster_suite(seurat_object = splg_unmodified, res = 1.2, ndims = 1:20, strat = "tsne", jackstraw = F, coord_strat = "pca")
@@ -237,4 +215,16 @@ marker_names_list = list(
   
   
   )
+sp_kegg_smts = sp_kegg_smts %>% unique()
+slc4a = gsqs(sp_kegg_smts, "SLC4A") %>% unique() %>% add_row(GeneID = "COLP3alpha", Name = "COLP3alpha")
+(all_stages[[7]] %>% GetAssayData(slot = "counts"))["erg",] %>% sort(decreasing = T) %>% head(20)
+(all_stages[[7]] %>% GetAssayData(slot = "counts"))["erg",] %>% sum()
+FeaturePlot(all_stages[[8]], features = c("erg"), order = T)
 
+tt = tibble(GeneID = "LOC591481", Name = "SLC22A4/5")
+
+c19_markers = FindMarkers(all_stages[[8]], ident.1 = "19")
+c19_markers_2 = c19_markers %>% arrange(desc(avg_log2FC))
+c19_markers_2 %>% head(15)
+
+labeled_dotplot(all_stages[[8]], tt, plot_title = "", by_stage = F, plot_height = 500, interactive = T, col.min = -1, col.max = 5, dot.min = 0, cols = c("blue", "gold"))

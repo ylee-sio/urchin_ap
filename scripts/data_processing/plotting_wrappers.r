@@ -46,7 +46,18 @@ plot_multiple_dimplots = function(cluster_list, file_name){
 }
 
 # generates DotPlots which have labeled features along with option for plotly interactivity and export of interactive plots  
-labelled_dotplot = function(scrna_df, feature_df, plot_title, by_stage = F, plot_height, interactive, col.min, col.max, dot.min, cols, file_name){
+labeled_dotplot = function(
+    scrna_df,
+    feature_df,
+    plot_title,
+    by_stage = F,
+    plot_height,
+    interactive,
+    col.min,
+    col.max,
+    dot.min,
+    cols,
+    file_name){
   
   
   dp = DotPlot(scrna_df, features = feature_df$GeneID, col.min = col.min, col.max = col.max, dot.min = dot.min, cols = cols) + 
@@ -69,20 +80,20 @@ labelled_dotplot = function(scrna_df, feature_df, plot_title, by_stage = F, plot
         coord_flip() 
     }
 # creates unique directory for each output
-  unlabeled_output_dir_name = paste0(output_path, file_name)
-  output_dir_name = append_vis_num(unlabeled_output_dir_name)
-  dir.create(output_dir_name)
+  # unlabeled_output_dir_name = paste0(output_path, file_name)
+  # output_dir_name = append_vis_num(unlabeled_output_dir_name)
+  # dir.create(output_dir_name)
 
 # non-optional annotation
-  annotate_vis(output_dir_name = output_dir_name)
+  # annotate_vis(output_dir_name = output_dir_name)
 
 # creates pdf for static DotPlot
-  pdf(file = paste0(output_dir_name, file_name, "_dotplot", ".pdf"), height = 24, width=12)
-  dp
-  dev.off()
-  
-  htmlwidgets::saveWidget(as_widget(dp), paste0(output_dir_name, file_name,"_index.html"))
-
+  # pdf(file = paste0(output_dir_name, file_name, "_dotplot", ".pdf"), height = 24, width=12)
+  # dp
+  # dev.off()
+  # 
+  # htmlwidgets::saveWidget(as_widget(dp), paste0(output_dir_name, file_name,"_index.html"))
+  # 
   return(dp)
-
+  
 }  

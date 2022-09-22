@@ -59,6 +59,7 @@ sp_kegg_abc = tibble(
 
 sp_kegg_smts = bind_rows(sp_kegg_slc, sp_kegg_abc)
 
+write_csv(sp_kegg_smts, "data/working_data/sp_kegg_smts.csv")
 
 # parses raw kegg brite files into manipulatable dataframes
 parse_kegg_brite = function(kegg_json_file_path){

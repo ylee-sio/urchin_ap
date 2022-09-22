@@ -6,55 +6,6 @@ library(tictoc)
 # read in clustered, saved list of seurat objects
 all_stages = readRDS("data/working_data/all_stages.clustered_seurat_obj_list.rds")
 
-# create list of names to be referenced for naming separate files for each stage
-stage_names = c(
-  "8 Cell",
-  "64 Cell",
-  "Morula",
-  "Early Blastula",
-  "Mesenchymal Blastula",
-  "Hatched Blastula",
-  "Early Gastrula",
-  "Late Gastrula"
-)
-
-# filter for features of defined genesets which have value > 0 in entire dataset
-assay_data_counts = map(
-  .x = all_stages,
-  .f = function(x)(
-    GetAssayData(
-      object = x,
-      slot = "counts"
-      )
-  )
-)
-
-# find which features have no expression
-positive_features_each_stage = map(
-  .x = assay_data_counts,
-  .f = function(x)(
-    which(rowSums(x) > 0) %>% 
-      names()
-  )
-)
-
-# create seurat objects filtered for positive features
-stages_filtered_positive_features = map2(
-  .x = all_stages,
-  .y = positive_features_each_stage,
-  .f = function(x,y)(
-    subset(
-      x = x,
-      features = y
-    )
-  )
-)
-
-saveRDS(
-  stages_filtered_positive_features,
-  "data/working_data/all_stages.clustered_seurat_obj_list_positive_features_filtered.rds"
-  )
-
 splg = stages_filtered_positive_features[[8]]
 test_smt_geneid = rownames(splg)[rownames(splg) %in% sp_kegg_smts$GeneID %>% which()]
 test_smts_df = sp_kegg_smts[sp_kegg_smts$GeneID %in% test_smt_geneid %>% which(),] %>% unique()

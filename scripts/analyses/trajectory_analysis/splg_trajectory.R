@@ -1,27 +1,10 @@
-# install bioconductor software
-if (!require("BiocManager", quietly = TRUE))
-  install.packages("BiocManager")
-BiocManager::install(version = "3.15")
-
-# install monocle
-BiocManager::install("monocle")
-
-# install DDRTree (simple-ppt-like branch) from cole-trapnell-lab GitHub repo:
-devtools::install_github("cole-trapnell-lab/DDRTree", ref="simple-ppt-like")
-
-# install the latest version of L1-graph from cole-trapnell-lab GitHub repo:
-devtools::install_github("cole-trapnell-lab/L1-graph")
-# install several python packages Monocle 3 depends on:
-install.packages("reticulate")
 library(tidyverse)
-py_install('umap-learn', pip = T, pip_ignore_installed = T) # Ensure the latest version of UMAP is installed
-py_install("louvain")
-
-# pull the monocle3_alpha branch of the Monocle GitHub repo:
-devtools::install_github("cole-trapnell-lab/monocle-release", ref="monocle3_alpha")
+library(tictoc)
+library(reticulate)
+library(Seurat)
+library(monocle3)
 
 # Step 1: Normalizing and pre-processing the data
-library(monocle3)
 cds = load_mm_data(
   mat_path = "data/unmodified/sp8_lg/matrix.mtx.gz",
   feature_anno_path = "data/unmodified/sp8_lg/features.tsv.gz",
@@ -41,7 +24,6 @@ colnames(cds_feature_metadata_duplicates_removed) = c("gene_num", "gene_short_na
 
 # setting rownames to cell metadata
 rownames(cds_cell_metadata) = cds_cell_metadata$X1
-
 
 # removing duplicate genes from expression matrix
 cds_matrix = cds_matrix[-cds_duplicates_index,]

@@ -86,5 +86,3 @@ saveRDS(all_stages.seurat_obj_list,  "~/Projects/urchin_ap/data/working_data/all
 #this will not contain features with 0 counts
 saveRDS(all_stages.clustered_seurat_obj_list, "~/Projects/urchin_ap/data/all_stages.clustered_seurat_obj_list.rds")
 
-print("Done saving files. ")
-toc()

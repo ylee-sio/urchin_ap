@@ -58,6 +58,14 @@ subcluster_suite = function(seurat_object, res, ndims, strat, jackstraw, coord_s
 
 }
 
+# gene set quick search
+# from a tibble of a gene set where columns = c(GeneID,Name)
+# quickly search name matches and obtain tibble of search by name
+gsqs = function(gene_set, gene_name){
+  res = gene_set[gene_set$Name %>% str_which(gene_name),]
+  return(res)
+}
+
 # returns numbers of cells from each Ident in a seurat_obj
 get_cell_stats = function(seurat_obj){
 
