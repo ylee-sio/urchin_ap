@@ -1,26 +1,39 @@
 library(jsonlite)
 
 # read in kegg brite pathway categorized genes from KEGG
-sp_kegg_transporters = read_json("data/source/spu02000_transporters.json") %>% 
+sp_kegg_all_genes = read_json("data/source/spu00001_all.json") %>% 
   unlist(use.names = F)
 
 # filter for items starting with digits by getting an index for sp_kegg_transporters. these digits are entrez GeneIDs
-sp_kegg_transporters_digit_start_index = sp_kegg_transporters %>% 
+present_geneid = sp_kegg_all_genes %>% 
   str_starts("[:digit:]") %>% 
   which()
 
 # filtered list of items starting with digits
-sp_kegg_transporters_cleaned = sp_kegg_transporters[sp_kegg_transporters_digit_start_index]
+sp_kegg_all_genes_cleaned = sp_kegg_all_genes[present_geneid]
 
-# obtain index for those annotated as "SLC". after manual checking, this does get all of them since they are annotated as SLC by standard
-sp_kegg_slc_index = sp_kegg_transporters_cleaned %>% 
-  str_detect("SLC") %>% 
-  which()
+sp_kegg_all_genes_geneid_num = sp_kegg_all_genes_cleaned %>% 
+  str_extract("[:digit:]{6,}") 
 
-# obtain index for those annotated as "ABC". after manual checking, this does get all of them since they are annotated as ABC by standard
-sp_kegg_abc_index = sp_kegg_transporters_cleaned %>% 
-  str_detect("ABC") %>% 
-  which()
+sp_kegg_slc_geneid_isolated = paste0("LOC", sp_kegg_all_genes_geneid_num)
+
+sp_kegg_all = tibble(
+  GeneID = c(sp_kegg_slc_geneid_isolated),
+  Name = c(sp_kegg_all_genes_cleaned)
+)
+
+sp_kegg_all_final = subset(sp_kegg_all, GeneID != "LOCNA")
+write_csv(sp_kegg_all_final, "data/working_data/sp_kegg_all_final.csv")
+
+# # obtain index for those annotated as "SLC". after manual checking, this does get all of them since they are annotated as SLC by standard
+# sp_kegg_slc_index = sp_kegg_transporters_cleaned %>% 
+#   str_detect("SLC") %>% 
+#   which()
+# 
+# # obtain index for those annotated as "ABC". after manual checking, this does get all of them since they are annotated as ABC by standard
+# sp_kegg_abc_index = sp_kegg_transporters_cleaned %>% 
+#   str_detect("ABC") %>% 
+#   which()
 
 # use the indices obtained above to filter from a cleaned df 
 sp_kegg_slc_digit_start_extracted = sp_kegg_transporters_cleaned[sp_kegg_slc_index]

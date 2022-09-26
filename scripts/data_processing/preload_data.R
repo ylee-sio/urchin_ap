@@ -45,9 +45,6 @@ all_stages.clustered_seurat_obj_list = future_map(
 )
 saveRDS(all_stages.clustered_seurat_obj_list, "data/unmodified/all_stages.clustered_seurat_obj_list.rds")
 
-
-unmod_integ = readRDS("sp_transportomics/data_sources/primary/scrna/GSE149221_integrated/GSE149221_SpInteg.rds")
-
 splg_unmodified.data = Read10X(data.dir = "~/sp_transportomics/data_sources/primary/scrna/GSE149221_RAW/SpLG")
 splg_unmodified = CreateSeuratObject(counts = splg_unmodified.data, project = "Late\ngastrula")
 urchin_5_splg_clustered_unmodified = subcluster_suite(seurat_object = splg_unmodified, res = 1.2, ndims = 1:20, strat = "tsne", jackstraw = F, coord_strat = "pca")
@@ -94,7 +91,7 @@ urchin_5_sp1_clustered = subcluster_suite(sp1, res = .4, ndims = 1:15, strat = "
 # urchin_5_sp48gcm_con_mo_clustered = subcluster_suite(sp48gcm_con_mo, res = 1.2, ndims = 1:20, strat = "tsne", jackstraw = F,coord_strat = "pca")
 # DimPlot(urchin_5_sp48gcm_con_mo_clustered)
 
-named_locus_list_a = rownames(urchin_5_splg_clustered_unmodified)[which(str_sub(rownames(urchin_5_splg_clustered_unmodified), 1,3) != "LOC")]
+named_locus_list_a = rownames(splg)[which(str_sub(rownames(splg), 1,3) != "LOC")]
 named_locus_list_b = named_locus_list_a[which(str_sub(named_locus_list_a, 1,3) != "trn")]
 named_locus_list_c = named_locus_list_b[which(str_sub(named_locus_list_b, 1,3) != "Mir")]
 named_locus_list_d = named_locus_list_c[which(str_sub(named_locus_list_c, 1,3) != "mer")] %>% sort()

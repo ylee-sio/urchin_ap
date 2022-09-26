@@ -1,6 +1,6 @@
 library(tidyverse)
 library(Seurat)
-library(ggplotly)
+library(plotly)
 
 # standardizes output directory
 output_path = "~/Projects/urchin_ap/output/"
@@ -36,7 +36,7 @@ plot_multiple_dimplots = function(cluster_list, file_name){
 # non-optional annotation
   annotate_vis(output_dir_name = output_dir_name)
 # creates pdf of DimPlots
-  pdf(file = paste0(output_dir_name, file_name, "_dimplot.pdf", height = 12, width = 12)
+  pdf(file = paste0(output_dir_name, file_name, "_dimplot.pdf", height = 12, width = 12))
   plots
   dev.off()
 
@@ -56,7 +56,7 @@ labeled_dotplot = function(
     col.min,
     col.max,
     dot.min,
-    cols,
+    cols = NULL,
     file_name){
   
   
@@ -97,3 +97,38 @@ labeled_dotplot = function(
   return(dp)
   
 }  
+
+cross_representation_plot = function(cross_representation_data){
+  
+  fig = cross_representation_data
+  fig = fig %>% plot_ly(x = ~cluster_num, y = ~percent_representation, color = ~cluster_origin)
+  
+  fig %>%
+    layout(
+      yaxis = list(
+        title = list(
+          text = '% of Cells in Cell Identities from Cells in SMT activity clusters',
+          font = list(size = 30)
+        ),
+        tickfont = list(size = 30)
+      ),
+      xaxis = list(
+        title = list(
+          text = 'Cell Identities',
+          font = list(size = 30)
+        ),
+        tickfont = list(size = 30)
+      ),
+      legend = list(
+        title = list(
+          text = "<b> SMT Activity Clusters</b>",
+          font = list(size = 25)
+        ),
+        font = list(
+          size = 25
+        )
+      )
+    )
+  
+  return(fig)
+}
