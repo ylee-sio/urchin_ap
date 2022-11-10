@@ -1,5 +1,47 @@
 library(jsonlite)
 
+extract_kegg_genesets = function(json_path, output_path){
+  
+  sp_kegg_all_genes = read_json(json_path) %>% 
+    unlist(use.names = F)
+  
+  # filter for items starting with digits by getting an index for sp_kegg_transporters. these digits are entrez GeneIDs
+  present_geneid = sp_kegg_all_genes %>% 
+    str_starts("[:digit:]") %>% 
+    which()
+  
+  # filtered list of items starting with digits
+  sp_kegg_all_genes_cleaned = sp_kegg_all_genes[present_geneid]
+  
+  sp_kegg_all_genes_geneid_num = sp_kegg_all_genes_cleaned %>% 
+    str_extract("[:digit:]{6,}") 
+  
+  sp_kegg_slc_geneid_isolated = paste0("LOC", sp_kegg_all_genes_geneid_num)
+  
+  sp_kegg_all = tibble(
+    GeneID = c(sp_kegg_slc_geneid_isolated),
+    Name = c(sp_kegg_all_genes_cleaned)
+  )
+  
+  sp_kegg_all_final = subset(sp_kegg_all, GeneID != "LOCNA")
+  write_csv(sp_kegg_all_final, path = output_path)
+  
+  return(sp_kegg_all_final)
+  
+}
+process_kegg_geneset = function(kegg_geneset_df)
+
+sp_kegg_tfs = extract_kegg_genesets("data/source/spu03000_transcription_factors.json", output_path = "data/working_data/sp_kegg_tfs.csv")
+sp_kegg_ics = extract_kegg_genesets("data/source/spu04040_ion_channels.json", output_path = "data/source/spu04040_ion_channels.json")
+sp_kegg_exo = extract_kegg_genesets("data/source/spu04147_exosome.json", output_path = "data/source/sp_kegg_exo.csv")
+sp_kegg_mt = extract_kegg_genesets("data/source/spu04131_membrane_trafficking.json", output_path = "data/source/sp_kegg_mt.csv")
+sp_kegg_enzymes = extract_kegg_genesets("data/source/spu01000_enzymes.json", output_path = "data/source/sp_kegg_enzymes.csv")
+sp_kegg_traslation_factors = extract_kegg_genesets("data/source/spu03012_translation_factors.json", output_path = "data/source/sp_kegg_translation_factors.csv")
+sp_kegg_splice = extract_kegg_genesets("data/source/spu03041_sliceosome.json", output_path = "data/source/sp_kegg_splice.csv")
+sp_kegg_pk = extract_kegg_genesets("data/source/spu01001_protein_kinases.json", output_path = "data/source/sp_kegg_pk.csv")
+sp_kegg_smts = extract_kegg_genesets("data/source/spu02000_transporters.json", output_path = "data/source/sp_kegg_smts_2.csv")
+
+
 # read in kegg brite pathway categorized genes from KEGG
 sp_kegg_all_genes = read_json("data/source/spu00001_all.json") %>% 
   unlist(use.names = F)
@@ -25,11 +67,16 @@ sp_kegg_all = tibble(
 sp_kegg_all_final = subset(sp_kegg_all, GeneID != "LOCNA")
 write_csv(sp_kegg_all_final, "data/working_data/sp_kegg_all_final.csv")
 
+
+
+all_smts=read_csv("data/working_data/sp_kegg_smts.csv") %>% unique() 
+num_smts_genome = all_smts %>% nrow()
+
 # # obtain index for those annotated as "SLC". after manual checking, this does get all of them since they are annotated as SLC by standard
-# sp_kegg_slc_index = sp_kegg_transporters_cleaned %>% 
-#   str_detect("SLC") %>% 
-#   which()
-# 
+sp_kegg_slc_index = sp_kegg_transporters_cleaned %>%
+  str_detect("SLC") %>%
+  which()
+
 # # obtain index for those annotated as "ABC". after manual checking, this does get all of them since they are annotated as ABC by standard
 # sp_kegg_abc_index = sp_kegg_transporters_cleaned %>% 
 #   str_detect("ABC") %>% 
@@ -73,7 +120,7 @@ sp_kegg_abc = tibble(
 sp_kegg_smts = bind_rows(sp_kegg_slc, sp_kegg_abc)
 
 write_csv(sp_kegg_smts, "data/working_data/sp_kegg_smts.csv")
-
+working_sp_kegg_smts = read_csv("data/working_data/sp_kegg_smts.csv")
 # parses raw kegg brite files into manipulatable dataframes
 parse_kegg_brite = function(kegg_json_file_path){
   awful_kegg_json = tibble(L2_l1 = "L2_l1",

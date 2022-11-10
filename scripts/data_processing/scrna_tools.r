@@ -30,7 +30,7 @@ subcluster_suite = function(seurat_object, res, ndims){
   seurat_object <- FindNeighbors(seurat_object, dims = ndims)
   seurat_object <- FindClusters(seurat_object, resolution = res, verbose = FALSE, algorithm = 3)
   seurat_object <- RunUMAP(seurat_object, dims = ndims, n.epochs = 500, n.neighbors = 5L, min.dist = 0.05)
-  seurat_object <- RunTSNE(seurat_object, dims = ndims)
+  seurat_object <- RunTSNE(seurat_object, dims = ndims, check_duplicates = F)
   
   toc()
   print("****** Job finished. ******")
@@ -196,8 +196,6 @@ find_new_cluster_cell_idents_in_old_cluster_cell_idents = function(new_seurat_ob
       }
       
     } else {print(paste0("All cross representative clusters present for cluster ", j))}
-    
-    
     
   }
   res = map(.x = cell_stats_of_cells_in_new_seurat_obj_for_each_ident_in_old_seurat_obj_with_new_cluster_id_origin_column,

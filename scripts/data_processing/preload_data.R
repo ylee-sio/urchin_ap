@@ -1,5 +1,10 @@
+library(rtracklayer)
+library(tidyverse)
+library(Seurat)
 # Run this script in terminal using 'R CMD BATCH obtain_working_data.R'
 # This script only needs to be run one-time to obtain working data that has been processed with the parameters below. Adjust accordingly.
+
+sp_kegg_gpcr = read_csv("data/working_data/sp_kegg_gpcr.csv")
 
 # setting workers for parallel operations
 plan(multicore, workers = 8)
@@ -101,7 +106,202 @@ named_locus_df = tibble(
   Name = named_locus_list_d
   
 ) 
-spuranno = readGFF("~/sp_transportomics/data_sources/primary/spur4.2_annotations_echinobase/Spur4_2_models.gff3")
+spuranno = readGFF("~/Projects/urchin_ap/data/source/sp5.0.gff3") %>% as_tibble()
+
+# contains 32,948 records. however, does not include transcript isoforms which are nested under the same gene id
+spuranno_type_gene = spuranno %>% subset(type=="gene")
+
+# spuranno_type_gene will not contain give prodcut information
+# subsetting "type" by mrna, will allow us to make a dataframe with product information
+# which is the only feature that seems to contain transcript variant information
+# however, subsetting "type" my mrna gives a longer df because mrnas will have transcript variant rows. 
+# rows with transcript variants will have the same gene id, but will have different transcript ids
+
+# contains 38,427 mrna records; does not mean 38,427 genes
+spuranno_type_mrna = spuranno %>% subset(type=="mRNA")
+
+# confirmation that any gene id that is in mrna df, is in gene df
+spuranno_type_mrna$gene %in% spuranno_type_gene$gene %>% which() %>% length
+spuranno_type_mrna$gene %>% length
+
+# subset for rows containing "transcript variant" 
+# in the "product" variable to get all genes which have any transcript and all their respective transcripts.
+# to do this, first get an index of all the rows that contain this information.
+# it appears this information is only available as text in the "product" variable
+# no separate column/variable is used to contain transcript variant information
+spuranno_type_mrna_tv_only_index = spuranno_type_mrna$product %>% str_which("transcript variant")
+spuranno_type_mrna_nontv_only_index = spuranno_type_mrna$product %>% str_which("transcript variant", negate = T)
+
+# quickly check lengths of resulting dfs. if using a search term to pick out transcript variants is the way to do this,
+# which doesn't seem ideal, the sum of the lengths of both indices should add up to the total number of rows of 
+# spuranno_type_mrna
+spuranno_type_mrna_tv_only_index %>% length
+spuranno_type_mrna_nontv_only_index %>% length
+(spuranno_type_mrna_tv_only_index %>% length) + (spuranno_type_mrna_nontv_only_index %>% length)
+spuranno_type_mrna %>% nrow
+
+# the lengths seem to confirm that exclusive portions of the df are being captured
+# 16,566/38,427 records are variants
+# TVs have the same gene id. however, the language is a bit tricky... 
+# might the product column for a gene NOT have "transcript variant" in the text if it is the "first" of the variants?
+# to check for this, check if any of the gene ids in spuranno_type_mrna_nontv_only_index are in spuranno_type_mrna_tv_only_index
+tv_genes = spuranno_type_mrna$gene[spuranno_type_mrna_nontv_only_index] 
+nontv_genes = spuranno_type_mrna$gene[spuranno_type_mrna_tv_only_index]
+
+# it seems like there are some matches. 
+tv_nontv_overlap_genes = nontv_genes[non_tv_genes %in% tv_genes %>% which()] %>% unique()
+tv_nontv_overlap_genes_full_info = filter(spuranno_type_mrna, gene %in% tv_nontv_overlap_genes) 
+tv_nontv_overlap_genes_product = tv_nontv_overlap_genes_full_info %>% select(product)
+
+# it seems that there are indeed some genes that have isoforms but there is a record of the gene whose 
+# product is not annotated to be an isoform... despite having the same gene ID
+# it seems this is the case with manually annotated/curated genes
+# to solve this issue, we can simply add "transcript variant" into the product column for records that do not have this
+# first, locate in spuranno_type_mrna the records for these genes, and obtain unique record identifier for these records.
+# in this case, it would be "transcript_id"
+tv_nontv_overlap_genes_records_transcript_id= subset(
+  spuranno_type_mrna, 
+  gene %in% 
+    tv_nontv_overlap_genes & 
+    str_detect(
+      product, 
+      "transcript variant", 
+      negate = T
+      )
+  ) %>% 
+  select("transcript_id")
+
+# obtain indices of these transcript ids
+tv_nontv_overlap_genes_records_transcript_id_index = spuranno_type_mrna$transcript_id %in% tv_nontv_overlap_genes_records_transcript_id$transcript_id %>% which()
+
+# finally, add the product annotation to spuranno_type_mrna for the above found genes
+# then, among these, locate genes whose "product" does not contain "transcript variant" and add "transcript variant X0"
+spuranno_type_mrna[tv_nontv_overlap_genes_records_transcript_id_index,]$product = paste0(spuranno_type_mrna[tv_nontv_overlap_genes_records_transcript_id_index,]$product, " transcript variant 0")
+
+# remember that we found 16,566/38,427 records to have variants. if everything has been processed as planned,
+# we should see in spuranno_type_mrna that there are an additional 134, for a total of 167000 records with transcript variants.
+spuranno_type_mrna$product %>% str_which("transcript variant") %>% length()
+
+# all of the transcript variant containing genes have been accounted for.
+# now we can count the things we need to count:
+
+# number of unique gene IDs
+spuranno_type_mrna$gene %>% unique() %>% length()
+
+# number of unique genes with genes that have transcript isoforms counted as single genes
+genes_with_tv_count = spuranno_type_mrna[spuranno_type_mrna$product %>% str_which("transcript variant"),] %>% select(gene) %>% unique() %>% nrow()
+genes_without_tv_count = spuranno_type_mrna[spuranno_type_mrna$product %>% str_which("transcript variant", negate = T),] %>% select(gene) %>% unique() %>% nrow()
+genes_with_tv_count + genes_without_tv_count
+
+# number of unique transcripts
+spuranno_type_mrna$ID %>% unique() %>% length()
+
+spuranno_transporters = spuranno_type_mrna[spuranno_type_mrna$gene %in%  sp_kegg_smts$GeneID %>% which(),]
+
+# number of unique transporter genes
+spuranno_transporters$gene %>% unique() %>% length()
+
+# number of total transporter transcripts and all transcript variants
+spuranno_transporters$transcript_id %>% unique() %>% length()
+
+# spuranno_transporters only gene ids
+spuranno_transporters_geneid_only = spuranno_transporters$gene
+
+# number of transporters each stage of scrnaseq dataset = 722
+smts_in_scrnaseq = tibble(
+  GeneID = rownames(all_stages[[1]])[rownames(all_stages[[1]]) %in% spuranno_transporters_geneid_only],
+  Name = rownames(all_stages[[1]])[rownames(all_stages[[1]]) %in% spuranno_transporters_geneid_only]
+)
+
+smts_in_scrnaseq_with_common_names = left_join(smts_in_scrnaseq, sp_kegg_smts, by = "GeneID") %>% unique()
+
+# cluster analysis on all stages separately with the same resolution and number of dimenions
+all_stages_clustered = 
+  map(
+    .x = all_stages, 
+    .f = function(x)(
+      subcluster_suite(
+        seurat_object = x,
+        res = 1.0,
+        ndims = 1:25
+        )
+      )
+    )
+
+top_markers_all_stages = 
+  map(
+    .x = all_stages_clustered,
+    .f = function(x)(
+      FindAllMarkers(
+        object = x,
+        logfc.threshold = 1,
+        only.pos = T,
+        min.pct = 0.25
+        )
+      )
+    )
+
+smt_only_all_stages_clustered = 
+  map(
+    .x = all_stages_clustered,
+    .f = function(x)(
+      isolate_geneset_in_clusters(
+        GetAssayData(object = x, slot = "count"),
+        smts_in_scrnaseq
+        )
+    )
+  )
+
+smt_only_all_stages_reclustered = 
+  map(
+    .x = smt_only_all_stages_clustered, 
+    .f = function(x)(
+      subcluster_suite(
+        seurat_object = x,
+        res = 1.0,
+        ndims = 1:25
+      )
+    )
+  )
+
+smt_only_top_markers_all_stages = 
+  map(
+    .x = smt_only_all_stages_reclustered,
+    .f = function(x)(
+      FindAllMarkers(
+        object = x,
+        logfc.threshold = 1,
+        only.pos = T,
+        min.pct = 0.25
+      )
+    )
+  )
+
+
+
+
+# this may mean that there are genes where not all genes which have transcript variants 
+# contain the term in the "product" column
+# I still can't find a better way to get transcript variants without simply using a search term...
+# first let's find out what these overlapping genes are
+
+# then get the gene ids for all the matches
+
+
+
+# then filtering the mrna df by genes in the genes df should be more certain and give a df with product/transcript variant information
+
+
+# which genes in the genome have transcript variants, and what are all of their transcript variants?
+spuranno_type_gene_variant_containing_genes_index = spuranno_type_gene$product %>% str_which("variant")
+
+# how many genes with transcript variants are there for all genes that have transcript variants?
+spuranno_mrna_variants_only = spuranno_mrna[spuranno_mrna_variant_containing_genes_index,] %>% nrow
+
+# how many genes with transcript variants are there?
+spuranno_mrna_variants_only$gene %>% unique %>% length()
+
+
 sp_kegg_smts = parse_kegg_brite("~/sp_transportomics/data_sources/primary/kegg_genesets/sp_smts.json")
 sp_kegg_tfs = parse_kegg_brite("~/sp_transportomics/data_sources/primary/kegg_genesets/sp_tfs.json")
 sp_kegg_mem_traf = parse_kegg_brite("~/sp_transportomics/data_sources/primary/kegg_genesets/sp_membrane_trafficking.json")
