@@ -5,12 +5,13 @@ library(gridExtra)
 library(cowplot)
 
 sp_kegg_smts = read_csv("data/working_data/sp_kegg_smts.csv")
+
+
 splg_expression_matrix = Read10X("data/unmodified/sp8_lg/")
 speg_expression_matrix = Read10X("data/unmodified/sp7_eg/")
 
 all_stages = readRDS("data/working_data/all_stages.clustered_seurat_obj_list.rds")
 splg = all_stages[[8]]
-speg = all_stages[[7]]
 
 isolate_geneset_in_clusters = function(expression_matrix, geneset) {
   
@@ -104,23 +105,7 @@ cross_rep_dimplot_overlay = function(control_seurat_obj, geneset_specific_seurat
   
 }
 
-# splg_smts_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_smts)
-splg_smts_only = isolate_geneset_in_clusters(splg_expression_matrix, smts_in_scrnaseq)
-speg_smts_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_smts)
-splg_gpcrs_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_gpcr)
-speg_gpcrs_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_gpcr)
-splg_tfs_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_tfs)
-speg_tfs_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_tfs)
-splg_exo_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_exo)
-speg_exo_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_exo)
-splg_mt_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_mt)
-speg_mt_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_mt)
-splg_enzymes_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_enzymes)
-speg_enzymes_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_enzymes)
-splg_splice_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_splice)
-speg_splice_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_splice)
-splg_pk_only = isolate_geneset_in_clusters(splg_expression_matrix, sp_kegg_pk)
-speg_pk_only = isolate_geneset_in_clusters(speg_expression_matrix, sp_kegg_pk)
+splg_smts_only = isolate_geneset_in_clusters(splg_expression_matrix, smts_in_scrnaseq_with_common_names_cleaned)
 
 splg = subcluster_suite(
   seurat_object = splg,
@@ -128,179 +113,132 @@ splg = subcluster_suite(
   ndims = 1:25
 )
 
-speg = subcluster_suite(
-  seurat_object = speg,
-  res = 0.5,
-  ndims = 1:15
-)
-
-splg_pk_only = subcluster_suite(
-  seurat_object = splg_pk_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-speg_pk_only = subcluster_suite(
-  seurat_object = speg_pk_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-splg_splice_only = subcluster_suite(
-  seurat_object = splg_splice_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-speg_splice_only = subcluster_suite(
-  seurat_object = speg_splice_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-splg_enzymes_only = subcluster_suite(
-  seurat_object = splg_enzymes_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-speg_enzymes_only = subcluster_suite(
-  seurat_object = speg_enzymes_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-splg_mt_only = subcluster_suite(
-  seurat_object = splg_mt_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-speg_mt_only = subcluster_suite(
-  seurat_object = speg_mt_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-splg_exo_only = subcluster_suite(
-  seurat_object = splg_exo_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-speg_exo_only = subcluster_suite(
-  seurat_object = speg_exo_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-# splg_ics_only = subcluster_suite(
-#   seurat_object = splg_ics_only,
-#   res = 0.5,
-#   ndims = 1:10
-# )
-# 
-# speg_ics_only = subcluster_suite(
-#   seurat_object = speg_ics_only,
-#   res = 0.5,
-#   ndims = 1:10
-# )
-
-splg_tfs_only = subcluster_suite(
-  seurat_object = splg_tfs_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-speg_tfs_only = subcluster_suite(
-  seurat_object = speg_tfs_only,
-  res = 0.5,
-  ndims = 1:15
-)
-
-# splg_gpcrs_only = subcluster_suite(
-#   seurat_object = splg_gpcrs_only,
-#   res = 0.5,
-#   ndims = 1:15
-# )
-# 
-# speg_gpcrs_only = subcluster_suite(
-#   seurat_object = speg_gpcrs_only,
-#   res = 0.5,
-#   ndims = 1:15
-# )
-
 splg_smts_only = subcluster_suite(
   seurat_object = splg_smts_only,
   res = 1.0,
   ndims = 1:25
 )
 
-speg_smts_only = subcluster_suite(
-  seurat_object = speg_smts_only,
-  res = 0.5,
-  ndims = 1:15
+celltype_markers = tibble(
+  GeneID = c(
+    "Klf7", "NK2.2", "spec2c",
+    "AnkAT-1", "foxq2", "NK2.1",
+    "hnf6",
+    "CHRD", "FoxG", "Lim1","LOC575591",
+    "LOC577601","LOC576365", "LOC100889993",
+    
+    "blimp1/krox", "FoxA", "Endo16","LOC575684",  "LOC764728",
+   
+    
+    "gcm", "Six1", "ABCC5a", "LOC584852", 
+
+    "GATAc", "Alx1", "erg", "LOC752471","SPARC", "LOC593609", "LOC583799", "LOC576148",
+    "Nanos2", "ago1",
+    
+     "vasa"
+    ),
+  Name = c(
+    "Klf7", "NK2.2", "spec2c",
+    "AnkAT-1", "foxq2", "NK2.1",
+    "onecut",
+    "CHRD", "FoxG", "Lim1","dmbx",
+    "brn1/2/4","islet1", "dmrt3",
+    
+    "blimp1/krox", "FoxA", "Endo16","a1cf", "hnf1", 
+    
+    
+    "gcm", "Six1", "ABCC5a", "strp4", 
+
+    "GATAc", "Alx1", "erg", "calumenin", "SPARC/osteonectin", "tetraspanin-4", "MMP18","prox1",
+    "Nanos2", "ago1",
+    
+    "vasa"
+    
+    )
 )
 
-control_dimplot = DimPlot(splg_labeled, label = T, pt.size = 0.1, reduction="umap") + ggtitle("Control")
-exo_dimplot = DimPlot(splg_exo_only, label = T, pt.size = 0.1) + ggtitle("Exosome related proteins")
-tfs_dimplot = DimPlot(splg_tfs_only, label = T, pt.size = 0.1) + ggtitle("Transcription factors")
-smts_dimplot = DimPlot(splg_smts_only, label = T, pt.size = 0.1, reduction="tsne") + ggtitle("SMTs")
-mt_dimplot = DimPlot(splg_mt_only, label = T, pt.size = 0.1) + ggtitle("Membrane trafficking related proteins")
-enzymes_dimplot = DimPlot(splg_enzymes_only, label = T, pt.size = 0.1) + ggtitle("Enzymes")
-splice_dimplot = DimPlot(splg_splice_only, label = T, pt.size = 0.1) + ggtitle("Spliceosome proteins")
-pk_dimplot = DimPlot(splg_pk_only, label = T, pt.size = 0.1) + ggtitle("Protein kinases")
-
-
-#***ENZYMES
-splg_enzymes_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = splg,
-  geneset_specific_seurat_obj = splg_enzymes_only,
-  cells_for_highlight_by_idents_list = splg_cells_by_idents_list,
-  base_title = "enzyme"
-  )
-
-pdf(file = "output/geneset_overlays/enzymes/base_splg_enzymes_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + enzymes_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/enzymes/splg_enzyme_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = splg_enzymes_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***EXOSOME
-splg_exo_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = splg,
-  geneset_specific_seurat_obj = splg_exo_only,
-  cells_for_highlight_by_idents_list = splg_cells_by_idents_list,
-  base_title = "Exosome"
+labeled_dotplot(
+  scrna_df = splg,
+  feature_df = celltype_markers,
+  col.min = 0,
+  col.max = 3,
+  interactive = T,
+  plot_height = 1000,
+  dot.min = 0,
+  cols = c("blue", "gold"),
+  plot_title = "",
+  by_stage = F
 )
 
-pdf(file = "output/geneset_overlays/exosome/base_splg_exo_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + exo_dimplot
-dev.off()
+# splg_labeled = RenameIdents(
+#   splg,
+#   '0' = "Aboral ectoderm/neural",
+#   '1' = "Aboral ectoderm/neural",
+#   '2' = "Hindgut",
+#   '3' = "Cilliary band",
+#   '4' = "Oral ectoderm",
+#   '5' = "Aboral ectoderm/neural",
+#   '6' = "Cilliary band",
+#   '7' = "Oral ectoderm",
+#   '8' = "Neural",
+#   '9' = "Cilliary band",
+#   '10' = "Mid-gut",
+#   '11' = "Oral ectoderm",
+#   '12' = "Aboral ectoderm/neural",
+#   '13' = "Foregut",
+#   '14' = "Foregut",
+#   '15' = "Pigment",
+#   '16' = "Aboral ectoderm/neural",
+#   '17' = "Oral ectoderm",
+#   '18' = "Foregut",
+#   '19' = "Primary mesenchyme",
+#   '20' = "Pigment",
+#   '21' = "Secondary mesenchyme",
+#   '22' = "Germline"
+# )
 
-pdf(file = "output/geneset_overlays/exosome/splg_enzyme_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = splg_exo_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***TFs
-splg_tfs_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = splg,
-  geneset_specific_seurat_obj = splg_tfs_only,
-  cells_for_highlight_by_idents_list = splg_cells_by_idents_list,
-  base_title = "transcription factors"
+splg_labeled = RenameIdents(
+  splg,
+  '0' = "Aboral ectoderm/neural",
+  '1' = "Aboral ectoderm/neural",
+  '8' = "Neural",
+  '3' = "Cilliary band",
+  '4' = "Oral ectoderm",
+  '5' = "Aboral ectoderm/neural",
+  '6' = "Cilliary band",
+  '7' = "Oral ectoderm",
+  '9' = "Cilliary band",
+  '11' = "Oral ectoderm",
+  '12' = "Aboral ectoderm/neural",
+  '18' = "Foregut",
+  '13' = "Foregut",
+  '14' = "Foregut",
+  '10' = "Mid-gut",
+  '2' = "Hindgut",
+  '15' = "Pigment",
+  '16' = "Aboral ectoderm/neural",
+  '17' = "Oral ectoderm",
+  '19' = "Skeletal",
+  '20' = "Pigment",
+  '21' = "Skeletal",
+  '22' = "Germline"
 )
 
-pdf(file = "output/geneset_overlays/tfs/base_splg_tfs_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + tfs_dimplot
-dev.off()
+labeled_dotplot(
+  scrna_df = splg_labeled,
+  feature_df = celltype_markers,
+  col.min = 0,
+  col.max = 3,
+  interactive = T,
+  plot_height = 1000,
+  dot.min = 0,
+  cols = c("blue", "gold"),
+  plot_title = "",
+  by_stage = F
+)
 
-pdf(file = "output/geneset_overlays/tfs/splg_tfs_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = splg_tfs_overlay_dimplots_by_idents_list)
-dev.off()
+DimPlot(splg_labeled, pt.size = 0.25 , label = T, label.box = F, label.size = 3, order = T, repel = T)
 
-#***SMTs
 splg_smts_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
   control_seurat_obj = splg_labeled,
   geneset_specific_seurat_obj = splg_smts_only,
@@ -312,182 +250,8 @@ pdf(file = "output/geneset_overlays/smts/base_splg_smts_plots.pdf", width = 9, h
 control_dimplot + smts_dimplot
 dev.off()
 
-library(gridExtra)
 pdf(file = "output/geneset_overlays/smts/splg_smts_overlay.pdf", width = 18, height = 18, onefile = T)
 grid.arrange(grobs = splg_smts_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***MTs
-splg_mt_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = splg,
-  geneset_specific_seurat_obj = splg_mt_only,
-  cells_for_highlight_by_idents_list = splg_cells_by_idents_list,
-  base_title = "membrane trafficking"
-)
-
-pdf(file = "output/geneset_overlays/membrane_trafficking/base_splg_mt_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + mt_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/membrane_trafficking/splg_mt_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = splg_mt_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***splice
-splg_splice_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = splg,
-  geneset_specific_seurat_obj = splg_splice_only,
-  cells_for_highlight_by_idents_list = splg_cells_by_idents_list,
-  base_title = "spliceosome"
-)
-
-pdf(file = "output/geneset_overlays/splice/base_splg_splice_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + splice_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/splice/splg_splice_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = splg_splice_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***pk
-splg_pk_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = splg,
-  geneset_specific_seurat_obj = splg_pk_only,
-  cells_for_highlight_by_idents_list = splg_cells_by_idents_list,
-  base_title = "pkosome"
-)
-
-pdf(file = "output/geneset_overlays/pk/base_splg_pk_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + pk_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/pk/splg_pk_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = splg_pk_overlay_dimplots_by_idents_list)
-dev.off()
-
-
-# ****************************************** SPEG
-
-control_dimplot = DimPlot(speg, label = T, pt.size = 0.1) + ggtitle("Control")
-exo_dimplot = DimPlot(speg_exo_only, label = T, pt.size = 0.1) + ggtitle("Exosome related proteins")
-tfs_dimplot = DimPlot(speg_tfs_only, label = T, pt.size = 0.1) + ggtitle("Transcription factors")
-smts_dimplot = DimPlot(splg_smts_only, label = T, pt.size = 0.1) + ggtitle("SMTs")
-mt_dimplot = DimPlot(speg_mt_only, label = T, pt.size = 0.1) + ggtitle("Membrane trafficking related proteins")
-enzymes_dimplot = DimPlot(speg_enzymes_only, label = T, pt.size = 0.1) + ggtitle("Enzymes")
-splice_dimplot = DimPlot(speg_splice_only, label = T, pt.size = 0.1) + ggtitle("Spliceosome proteins")
-pk_dimplot = DimPlot(speg_pk_only, label = T, pt.size = 0.1) + ggtitle("Protein kinases")
-
-
-#***ENZYMES
-speg_enzymes_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = speg,
-  geneset_specific_seurat_obj = speg_enzymes_only,
-  cells_for_highlight_by_idents_list = speg_cells_by_idents_list,
-  base_title = "enzyme"
-)
-
-pdf(file = "output/geneset_overlays/enzymes/base_speg_enzymes_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + enzymes_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/enzymes/speg_enzyme_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = speg_enzymes_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***EXOSOME
-speg_exo_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = speg,
-  geneset_specific_seurat_obj = speg_exo_only,
-  cells_for_highlight_by_idents_list = speg_cells_by_idents_list,
-  base_title = "Exosome"
-)
-
-pdf(file = "output/geneset_overlays/exosome/base_speg_exo_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + exo_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/exosome/speg_enzyme_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = speg_exo_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***TFs
-speg_tfs_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = speg,
-  geneset_specific_seurat_obj = speg_tfs_only,
-  cells_for_highlight_by_idents_list = speg_cells_by_idents_list,
-  base_title = "transcription factors"
-)
-
-pdf(file = "output/geneset_overlays/tfs/base_speg_tfs_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + tfs_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/tfs/speg_tfs_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = speg_tfs_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***SMTs
-speg_smts_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = speg,
-  geneset_specific_seurat_obj = speg_smts_only,
-  cells_for_highlight_by_idents_list = speg_cells_by_idents_list,
-  base_title = "SMTs"
-)
-
-pdf(file = "output/geneset_overlays/smts/base_speg_smts_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + smts_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/smts/speg_smts_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = speg_smts_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***MTs
-speg_mt_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = speg,
-  geneset_specific_seurat_obj = speg_mt_only,
-  cells_for_highlight_by_idents_list = speg_cells_by_idents_list,
-  base_title = "membrane trafficking"
-)
-
-pdf(file = "output/geneset_overlays/membrane_trafficking/base_speg_mt_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + mt_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/membrane_trafficking/speg_mt_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = speg_mt_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***splice
-speg_splice_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = speg,
-  geneset_specific_seurat_obj = speg_splice_only,
-  cells_for_highlight_by_idents_list = speg_cells_by_idents_list,
-  base_title = "spliceosome"
-)
-
-pdf(file = "output/geneset_overlays/splice/base_speg_splice_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + splice_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/splice/speg_splice_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = speg_splice_overlay_dimplots_by_idents_list)
-dev.off()
-
-#***pk
-speg_pk_overlay_dimplots_by_idents_list = cross_rep_dimplot_overlay(
-  control_seurat_obj = speg,
-  geneset_specific_seurat_obj = speg_pk_only,
-  cells_for_highlight_by_idents_list = speg_cells_by_idents_list,
-  base_title = "protein kinases"
-)
-
-pdf(file = "output/geneset_overlays/pk/base_speg_pk_plots.pdf", width = 9, height = 4, onefile = T)
-control_dimplot + pk_dimplot
-dev.off()
-
-pdf(file = "output/geneset_overlays/pk/speg_pk_overlay.pdf", width = 18, height = 18, onefile = T)
-grid.arrange(grobs = speg_pk_overlay_dimplots_by_idents_list)
 dev.off()
 
 
@@ -514,72 +278,6 @@ dev.off()
 #     "islet1", "dmrt3", "SLC16A14", "SoxE", "FoxF", "mbx", "hnf1", "brn1/2/4")
 # )
 
-celltype_markers = tibble(
-  GeneID = c(
-    "Klf7", "NK2.2", "spec2c",
-    "blimp1/krox", "FoxA", "Endo16",
-    "CHRD", "FoxG", "Lim1", "hnf6",
-    "AnkAT-1", "foxq2", "NK2.1",
-    "gcm", "Six1", "ABCC5a", 
-    "delta", "snail", "ago1",
-    "GATAc", "Alx1", "erg"),
-  Name = c(
-    "Klf7", "NK2.2", "spec2c",
-    "blimp1/krox", "FoxA", "Endo16",
-    "CHRD", "FoxG", "Lim1","hnf6",
-    "AnkAT-1", "foxq2", "NK2.1",
-    "gcm", "Six1", "ABCC5a", 
-    "delta", "snail", "ago1",
-    "GATAc", "Alx1", "erg")
-)
-
-labeled_dotplot(
-  scrna_df = splg,
-  feature_df = celltype_markers,
-  col.min = 0,
-  col.max = 3,
-  interactive = T,
-  plot_height = 1000,
-  dot.min = 0,
-  cols = c("blue", "gold"),
-  plot_title = "",
-  by_stage = F
-)
-
-splg_labeled = RenameIdents(
-  splg,
-  '0' = "Aboral ectoderm/neural",
-  '1' = "Aboral ectoderm/neural",
-  '2' = "Endoderm",
-  '3' = "Cilliary band",
-  '4' = "Oral ectoderm",
-  '5' = "Aboral ectoderm/neural",
-  '6' = "Cilliary band",
-  '7' = "Oral ectoderm",
-  '8' = "Neural",
-  '9' = "Cilliary band",
-  '10' = "Endoderm",
-  '11' = "Oral ectoderm",
-  '12' = "Aboral ectoderm/neural",
-  '13' = "Endoderm",
-  '14' = "Endoderm",
-  '15' = "Pigment",
-  '16' = "Aboral ectoderm/neural",
-  '17' = "Endoderm",
-  '18' = "Secondary mesenchyme",
-  '19' = "Skeletal",
-  '20' = "Secondary mesenchyme",
-  '21' = "Skeletal",
-  '22' = "Secondary mesenchyme"
-)
-
-DimPlot(splg_labeled, label=T, label.size = 2.5, label.box = T, repel = T, pt.size = 0.05) + 
-  ggtitle("Control: IP Clusters")
-
-DimPlot(splg_smts_only, label=T, label.size = 2.5, label.box = T, repel = T, pt.size = 0.05) +
-  ggtitle("Treatment: SMT AP Clusters")
-
-#FIG2
 labeled_dotplot(
   scrna_df = splg_labeled,
   feature_df = celltype_markers,
@@ -602,7 +300,7 @@ labeled_dotplot(
 
 
 #obtaining genes for top most expressed smts from each smt ap cluster
-all_top_markers_smtap = FindAllMarkers(splg_smts_only, logfc.threshold = 1.0, only.pos = T, min.pct = 0.25)
+all_top_markers_smtap = FindAllMarkers(splg_smts_only, logfc.threshold = 1.0, only.pos = T, min.pct = 0.20)
 all_top_markers_smtap_df_cleaned =
   all_top_markers_smtap %>%
   group_by(cluster) %>%
@@ -626,54 +324,46 @@ filtered_top_markers_smtap_ordered =
   arrange(-desc(cluster))
 
 filtered_top_markers_smtap_ordered_duplicated_index = filtered_top_markers_smtap_ordered$GeneID %>% duplicated() %>% which()
+
 filtered_top_markers_smtap_ordered_final = 
   filtered_top_markers_smtap_ordered[-c(filtered_top_markers_smtap_ordered_duplicated_index),] %>% 
   mutate(cluster=as.numeric(cluster)) %>% 
   arrange(-desc(cluster)) %>% 
-  left_join(smts_in_scrnaseq, by="GeneID") %>% 
+  left_join(smts_in_scrnaseq_with_common_names_cleaned, by="GeneID") %>% 
   unique() %>% 
   mutate(Name=Name.y.y)
 
 write.csv(filtered_top_markers_smtap_ordered_final, "~/Projects/urchin_ap/data/working_data/filtered_top_markers_smtap_ordered_final.csv")
 smtap_final_fig_input = read.csv("~/Projects/urchin_ap/data/working_data/filtered_top_markers_smtap_ordered_final.csv")
-smtap_final_fig_input = smtap_final_fig_input %>% mutate(Name = paste0(description, "-", "(",GeneID.x,") ", Name.y))
-labeled_dotplot(
-  scrna_df = splg_smts_only,
-  feature_df = smtap_final_fig_input,
-  col.min = 0,
-  col.max = 3,
-  interactive = F,
-  plot_height = 4000,
-  dot.min = 0,
-  cols = c("blue", "gold"),
-  plot_title = "",
-  by_stage = F
-) +
-  ylab("SMT AP Clusters") +
-  xlab("SMT AP Genes") +
-  ggtitle("Treatment: SMTAP Clusters") +
-  theme(axis.title = element_text(face="bold", size=20),
-        axis.text.x = element_text(size=16),
-        axis.text.y = element_text(size=16))+
+# smtap_final_fig_input = smtap_final_fig_input %>% mutate(Name = paste0(description, "-", "(",GeneID.x,") ", Name.y))
+smt_ap_dp = 
+  labeled_dotplot(
+    scrna_df = splg_smts_only,
+    feature_df = smtap_final_fig_input,
+    col.min = 0,
+    col.max = 3,
+    interactive = F,
+    plot_height = 4000,
+    dot.min = 0,
+    cols = c("blue", "gold"),
+    plot_title = "",
+    by_stage = F
+  ) +
+    ylab("SMT AP Clusters") +
+    xlab("SMT AP Genes") +
+    ggtitle("Treatment: SMTAP Clusters") +
+    theme(
+      axis.title = element_text(face="bold", size=20),
+      axis.text.x = element_text(size=16),
+      axis.text.y = element_text(size=16)) +
   theme(plot.title = element_text(size = 22, face = "bold"))
 
+ggsave2(smt_ap_dp,width = 24, height = 20, filename = "~/Projects/urchin_ap/output/smt_ap_dp.pdf", )
 
 
 #*** cross cluster type representation analysis
-splg_enzyme_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(splg_enzymes_only, splg_labeled)
 splg_smts_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(splg_smts_only, splg_labeled)
-splg_exo_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(splg_exo_only, splg_labeled)
-splg_mt_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(splg_mt_only, splg_labeled)
-splg_tfs_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(splg_tfs_only, splg_labeled)
 
-# speg_enzyme_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(speg_enzymes_only, speg_labeled)
-# speg_smts_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(speg_smts_only, speg_labeled)
-# speg_exo_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(speg_exo_only, speg_labeled)
-# speg_mt_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(speg_mt_only, speg_labeled)
-# speg_tfs_cross_representation = find_new_cluster_cell_idents_in_old_cluster_cell_idents(speg_tfs_only, speg_labeled)
-
-
-# splg_cross_representation_with_labeled_clusters = find_new_cluster_cell_idents_in_old_cluster_cell_idents(splg_enzymes_only, splg_labeled)
 splg_smts_cross_representation$cluster_origin = factor(splg_smts_cross_representation$cluster_origin, 
                                                        levels = splg_smts_cross_representation$cluster_origin %>% unique())
 splg_smts_cross_representation = splg_smts_cross_representation %>% mutate("Cell Identity"=cluster_num, percent_representation=percent_representation*100)
@@ -683,7 +373,7 @@ cell_ident_names=Idents(splg_labeled) %>% levels()
 ggplot(data=splg_smts_cross_representation) +
   geom_bar(mapping = aes(x=cluster_origin, y=percent_representation), stat = "identity") +
   # geom_text(aes(label = "hello"), vjust = 0) +
-  facet_wrap(~cluster_num, nrow = 2, ncol = 4, scales = "free") +
+  facet_wrap(~cluster_num, nrow = 4, ncol = 4, scales = "free") +
   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
   
   ylab("Percentages of IP cluster cells \n mapped to SMT AP cluster cells") +
@@ -695,35 +385,15 @@ ggplot(data=splg_smts_cross_representation) +
         axis.text.y = element_text(size=18)) +
   geom_text(aes(x=cluster_origin, y=percent_representation, label=paste0(num_cells)), angle=90, size = 6, hjust=-0.1)
 
-# #FIG2 fixed scale
-# ggplot(data=splg_smts_cross_representation) +
-#   geom_bar(mapping = aes(x=cluster_origin, y=percent_representation), stat = "identity") +
-#   # geom_text(aes(label = "hello"), vjust = 0) +
-#   facet_wrap(~cluster_num, nrow = 2, ncol = 4) +
-#   scale_y_continuous(expand = expansion(mult = c(0, .1))) +
-#   
-#   ylab("Percentages of IP cluster cells \n mapped to SMT AP cluster cells") +
-#   xlab("SMT AP Cluster") +
-#   theme(strip.text = element_text(face="bold", size=18),
-#         strip.background = element_rect(colour="black",size=1),
-#         axis.title = element_text(face="bold", size=18),
-#         axis.text.x = element_text(size=10),
-#         axis.text.y = element_text(size=10)) +
-#   geom_text(aes(x=cluster_origin, y=percent_representation, label=paste0(num_cells, " cell(s)")), angle=90, size = 4, hjust=-0.05)
-# 
-
-cross_representation_plot(splg_enzyme_cross_representation)
 cross_representation_plot(splg_smts_cross_representation)
-cross_representation_plot(splg_exo_cross_representation)
-cross_representation_plot(splg_mt_cross_representation)
-cross_representation_plot(splg_tfs_cross_representation)
+
 
 # cross_representation_plot(splg_cross_representation_with_labeled_clusters)
 
 # skeletal: post cross representation analysis
 
 
-skeletal_smt_ap_cells = subset(splg_smts_only, idents = c("9","10")) %>% Cells()
+skeletal_smt_ap_cells = subset(splg_smts_only, idents = c("8","12")) %>% Cells()
 splg_mapped_skeletal_smt_ap_cells = subset(splg, cells = skeletal_smt_ap_cells)
 
 splg_mapped_skeletal_smt_ap_cells = subcluster_suite(
@@ -736,44 +406,86 @@ skeletal_geneset = tibble(
   
   GeneID = c(
     # canonical PMC markers set 1
-    "SM50", "SM30A", "msp130", "LOC579101", "LOC579173", 
+    "SM50", "SM30A", "msp130", "LOC579101", "LOC579173", "Alx1", 
     
     # highly enriched markers found 
-    "LOC576560", "LOC576018",
+    "LOC576560", "LOC576018", "LOC583799","LOC586737", "LOC586753", "LOC577128",
     # canonical PMC markers set 2
-            "LOC583799", 
+     "LOC575628", "LOC100892657", "LOC582336",
     # PMC and SMC markers
-            "SFK7","LOC574611", "SPARC", "LOC752471",
-
+    "SFK7","LOC574611", "SPARC", "LOC752471",
+    
     # differentially expressed collagens
-            "LOC589794", "COLP1alpha", "COLP2alpha","COLP3alpha", "COLP4alpha", 
+    "LOC589794", "COLP1alpha", "COLP2alpha","COLP3alpha", "COLP4alpha", 
     # IP Markers
-    "LOC100887885", "LOC100892373", "LOC575826", "Alx1", "LOC580069", "GATAc", "erg",
+    "LOC100887885", "LOC100892373", "LOC575826", "LOC580069", "GATAc", "erg","LOC586389","LOC592057",
     # SMTs which have defined these two primary subpopulation of skeletal cells
-            "LOC591586", "LOC585510", "LOC592979", "LOC587674"),
+    "LOC576148", "LOC591586", "LOC585510", "LOC592979", "LOC587674",
+    #additional
+    "calret", "LOC575365","LOC594798", "LOC580975", "adv", "LOC577597", "LOC752782", 
+    "LOC593355"),
   
   Name = c(
     # canonical PMC markers set 1
-     "SM50", "SM30A", "msp130", "carbonic anhydrase 2", "otop2l", 
-     
-     # highly enriched markers found 
-      "neurexin-4", "matrilysin (MMP8)",
+    "SM50", "SM30A", "msp130", "carbonic anhydrase 2", "otop2l", "Alx1",
+    
+    # highly enriched markers found 
+    "neurexin-4", "Protein identified and sequenced from purified spicules in Mann et al. 2010: matrilysin (MMP18/19L3)",  "Protein identified and sequenced from purified spicules in Mann et al. 2010: MMP18 (MMP18/19L5)", "Protein identified and sequenced from purified spicules in Mann et al. 2010: macrophage metalloelastase (Sp-Mt1-4/MmpL5)","Protein identified and sequenced from purified spicules in Mann et al. 2010: macrophage metalloelastase (Sp-Mt1-4/MmpL6)", "Protein identified and sequenced from purified spicules in Mann et al. 2010: matrix metalloproteinase-24 (Sp-Mt5/MmpL2)", 
     # canonical PMC markers set 2
-            "MMP18",
+     "cyclophilin 1", "cyclophilin Livingston et al. 2006", "cyclophilin Livingston et al. 2006",
     # PMC and SMC markers
-           "SFK7", "cofilin", "SPARC",  "calumenin", 
+    "SFK7", "cofilin", "SPARC/osteonectin",  "calumenin", 
     
     # differentially expressed collagens
-           "collagen alpha-1(V) chain", "COLP1alpha", "COLP2alpha", "COLP3alpha", "COLP4alpha", 
+    "collagen alpha-1(V) chain", "COLP1alpha", "COLP2alpha", "COLP3alpha", "COLP4alpha", 
     # IP Markers
-    "Kirrel2L_4", "KirreL2L_6", "hex", "Alx1", "Alx4","GATAc","erg",
+    "Kirrel2L_4", "KirreL2L_6", "hex",  "Alx4","GATAc","erg","tbr","HesC",
     # SMTs which have defined these two primary subpopulation of skeletal cells
-           "SLC9A2", "SLC13A2", "SLC5A11", "SLC26A5")
+    "prox1", "SLC9A2", "SLC13A2", "SLC5A11", "SLC26A5",
+    #addtional
+    "calret", "calmodulin", "alpha-2-macroglobulin", "neprilysin-4", "adv",
+    "zinc metalloproteinase nas-13", "actin", "Calumenin-A")
   
 )
 
 labeled_dotplot(
   scrna_df = splg_mapped_skeletal_smt_ap_cells,
+  # scrna_df = splg_labeled,
+  feature_df = skeletal_geneset,
+  col.min = 0,
+  col.max = 4,
+  interactive = T,
+  plot_height = 1000,
+  dot.min = 0,
+  cols = c("blue", "gold"),
+  plot_title = "",
+  by_stage = F
+)
+
+ 
+labeled_dotplot(
+  scrna_df = splg_mapped_skeletal_smt_ap_cells,
+  # scrna_df = splg,
+  feature_df = skeletal_geneset,
+  col.min = 0,
+  col.max = 2,
+  interactive = T,
+  plot_height = 1000,
+  dot.min = 0,
+  cols = c("blue", "gold"),
+  plot_title = "",
+  by_stage = F
+) +
+  ylab("Skeletogenic-SMT AP clusters") +
+  xlab("Skeletogenic IP and AP markers\nand effector genes") +
+  ggtitle("Treatment: Subclusters of SMT AP cells mapped to the skeletal IP cluster") +
+  theme(axis.title = element_text(face="bold", size=20),
+        axis.text.x = element_text(size=16),
+        axis.text.y = element_text(size=16))+
+  theme(plot.title = element_text(size = 22, face = "bold"))
+
+labeled_dotplot(
+  scrna_df = splg,
   feature_df = skeletal_geneset,
   col.min = 0,
   col.max = 3,
@@ -792,4 +504,19 @@ labeled_dotplot(
         axis.text.y = element_text(size=16))+
   theme(plot.title = element_text(size = 22, face = "bold"))
 
+
+
+
+
+top_smtap_sk_markers = FindAllMarkers(splg_mapped_skeletal_smt_ap_cells, only.pos = T)
+get_cell_stats(splg_mapped_skeletal_smt_ap_cells)
+
+top_smtap_sk_markers %>%
+  group_by(cluster) %>%
+  arrange(desc(avg_log2FC)) %>% 
+  slice(1:50) %>% 
+  View()
+
+#DEAF1, LOC100893739
+FeaturePlot(splg, features="LOC763226")
 

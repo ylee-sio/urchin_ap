@@ -215,6 +215,16 @@ smts_in_scrnaseq = tibble(
 
 smts_in_scrnaseq_with_common_names = left_join(smts_in_scrnaseq, sp_kegg_smts, by = "GeneID") %>% unique()
 
+smts_in_scrnaseq_with_common_names_cleaned = 
+  subset(
+    smts_in_scrnaseq_with_common_names, 
+    str_detect(Name.y, "transporter") |
+      str_detect(Name.y, "SLC[:digit:]*[:alpha:]*[:digit:]*") |
+      str_detect(Name.y,"ABC[:digit:]*[:alpha:]*[:digit:]*") |
+      str_detect(Name.y,"solute") |
+      str_detect(Name.y,"carrier") 
+  ) %>% 
+  transmute(GeneID = GeneID, Name = Name.y)
 # cluster analysis on all stages separately with the same resolution and number of dimenions
 all_stages_clustered = 
   map(
@@ -279,27 +289,6 @@ smt_only_top_markers_all_stages =
 
 
 
-
-# this may mean that there are genes where not all genes which have transcript variants 
-# contain the term in the "product" column
-# I still can't find a better way to get transcript variants without simply using a search term...
-# first let's find out what these overlapping genes are
-
-# then get the gene ids for all the matches
-
-
-
-# then filtering the mrna df by genes in the genes df should be more certain and give a df with product/transcript variant information
-
-
-# which genes in the genome have transcript variants, and what are all of their transcript variants?
-spuranno_type_gene_variant_containing_genes_index = spuranno_type_gene$product %>% str_which("variant")
-
-# how many genes with transcript variants are there for all genes that have transcript variants?
-spuranno_mrna_variants_only = spuranno_mrna[spuranno_mrna_variant_containing_genes_index,] %>% nrow
-
-# how many genes with transcript variants are there?
-spuranno_mrna_variants_only$gene %>% unique %>% length()
 
 
 sp_kegg_smts = parse_kegg_brite("~/sp_transportomics/data_sources/primary/kegg_genesets/sp_smts.json")
